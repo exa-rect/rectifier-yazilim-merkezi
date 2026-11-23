@@ -61,6 +61,11 @@ function addanSurum(dosyaAdi) {
   if (m) return m[1].replace(/\.$/, '');
   return ad;
 }
+// YouTube linkinden video kimliği: youtu.be/ID, watch?v=ID, /shorts/ID, /embed/ID, /live/ID
+function youtubeId(url) {
+  const m = url.match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
 const yerelTarih = (d) => new Date(d.getTime() + 3 * 3600e3).toISOString().slice(0, 10); // Türkiye saati
 const sha256 = async (p) => createHash('sha256').update(await readFile(p)).digest('hex');
 const yonlendirme = (hedef) => `<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=${hedef}"><title>Yönlendiriliyor…</title></head><body><p>Dosya indiriliyor. Başlamazsa <a href="${hedef}">buraya tıklayın</a>.</p></body></html>\n`;
@@ -175,6 +180,43 @@ async function main() {
   }
   manifest.urunler.sort((a, b) => a.sira - b.sira);
 
+  // Kurulum sekmesi: indoor ve outdoor için ortak videolar (YouTube) ve dokümanlar (PDF vb.)
+  const DOK = path.join(KOK, 'dokumanlar');
+  const kurulum = { videolar: [], dokumanlar: [] };
+  let videoMetni = null;
+  try { videoMetni = await readFile(path.join(DOK, 'videolar.txt'), 'utf8'); } catch {}
+  if (videoMetni) {
+    videoMetni.replace(/^\uFEFF/, '').split(/\r?\n/).forEach((satir, i) => {
+      const s = satir.trim();
+      if (!s || s.startsWith('#')) return;
+      const parca = s.split('|');
+      const url = parca.pop().trim();
+      const baslik = parca.join('|').trim();
+      const id = youtubeId(url);
+      if (!id) { hatalar.push(`dokumanlar/videolar.txt satır ${i + 1}: YouTube linki tanınmadı (${url}). Biçim: Başlık | https://youtu.be/...`); return; }
+      kurulum.videolar.push({ baslik: baslik || `Video ${kurulum.videolar.length + 1}`, id, url });
+    });
+  }
+  let dokAdlari = [];
+  try {
+    dokAdlari = (await readdir(DOK, { withFileTypes: true }))
+      .filter((f) => f.isFile() && !f.name.startsWith('.') && !/^(readme\.md|videolar\.txt)$/i.test(f.name))
+      .map((f) => f.name).sort((a, b) => a.localeCompare(b, 'tr'));
+  } catch {}
+  for (const ad of dokAdlari) {
+    const kaynak = path.join(DOK, ad);
+    const { size } = await stat(kaynak);
+    if (size > MAX_BOYUT) { hatalar.push(`dokumanlar/${ad}: ${(size / 1048576).toFixed(1)} MiB, sınır 25 MiB. Videoları YouTube'a yükleyip linkini videolar.txt'ye yazın.`); continue; }
+    const zaman = await yuklemeZamani(kaynak);
+    await mkdir(path.join(CIKTI, 'dokumanlar'), { recursive: true });
+    await copyFile(kaynak, path.join(CIKTI, 'dokumanlar', ad));
+    kurulum.dokumanlar.push({
+      ad, boyut: size, sha256: await sha256(kaynak), yol: `dokumanlar/${encodeURIComponent(ad)}`,
+      tarih: yerelTarih(zaman), tur: (ad.match(/\.([^.]+)$/) || [, ''])[1].toLowerCase(),
+    });
+  }
+  manifest.kurulum = kurulum;
+
   if (hatalar.length) return bitir();
 
   await cp(SITE, CIKTI, { recursive: true });
@@ -197,6 +239,7 @@ function bitir(manifest) {
     console.log(`${u.ad}`);
     for (const k of u.kategoriler) console.log(`  ${k.ad.padEnd(32)} son kararlı: ${k.son || '-'}  (${k.surumler.length} sürüm)`);
   }
+  console.log(`Kurulum: ${manifest.kurulum.videolar.length} video, ${manifest.kurulum.dokumanlar.length} doküman`);
   console.log(`\nSite hazır: ${goreli(CIKTI)}/`);
 }
 
