@@ -4,3 +4,4 @@
 #   Kabin montajı ve kablo bağlantıları | https://youtu.be/XXXXXXXXXXX
 #   Yazılım yükleme adımları | https://www.youtube.com/watch?v=XXXXXXXXXXX
 # Videoyu YouTube'a "Liste dışı" (Unlisted) olarak yükleyin. # ile başlayan satırlar dikkate alınmaz.
+01 windows IP ayari | https://youtu.be/pwYijwZmbdA
