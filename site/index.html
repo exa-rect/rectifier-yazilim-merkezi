@@ -117,9 +117,19 @@ td ul { margin: 0; padding-left: 16px; }
 .state { padding: 40px 0; color: var(--muted); }
 footer { color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); padding: 10px 0 14px; }
 .araclar { display: flex; flex-wrap: wrap; gap: 6px; }
+nav.tabs button.kurulum-tab { margin-left: 6px; }
+.video { position: relative; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; background: #000; }
+.video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.dok { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; }
+.dok .fname { grid-column: 1; }
+.dok .fmeta { grid-column: 1 / -1; }
+.dok .araclar { grid-row: 1; grid-column: 2; flex-wrap: nowrap; }
+.bos { color: var(--muted); font-size: 13.5px; margin: 0; }
+.bos code { font: 12.5px var(--font-mono); background: var(--bg); padding: 1px 5px; border-radius: 4px; }
 @media (max-width: 420px) { .wrap { padding: 0 16px; } h1 { font-size: 22px; } .stamp { text-align: left; } }
 @media (max-width: 600px) {
   .wrap { padding: 0 12px; }
+  nav.tabs button.kurulum-tab { margin-left: 0; flex-basis: 100%; }
   header.top .wrap { padding-top: 10px; padding-bottom: 8px; gap: 2px; align-items: baseline; }
   h1 { font-size: 18px; }
   .lead { display: none; }
@@ -283,7 +293,61 @@ footer { color: var(--muted); font-size: 12px; border-top: 1px solid var(--line)
     ]);
   }
 
+  function kurulumGoster() {
+    var k = manifest.kurulum || { videolar: [], dokumanlar: [] };
+    var grid = document.getElementById('grid');
+    grid.textContent = '';
+    var dokBody = el('div', { class: 'card-body' });
+    if (k.dokumanlar.length) {
+      k.dokumanlar.forEach(function (d) {
+        var butonlar = [el('a', { class: 'btn primary', href: d.yol, download: d.ad, text: 'İndir' })];
+        if (/^(pdf|mp4|webm|png|jpe?g)$/.test(d.tur)) butonlar.unshift(el('a', { class: 'btn ghost', href: d.yol, target: '_blank', rel: 'noopener', text: 'Aç' }));
+        dokBody.appendChild(el('div', { class: 'dok' }, [
+          el('div', { class: 'fname', text: d.ad }),
+          el('div', { class: 'araclar' }, butonlar),
+          el('div', { class: 'fmeta' }, [el('span', { text: boyut(d.boyut) }), el('span', { text: tarih(d.tarih) })])
+        ]));
+      });
+    } else {
+      dokBody.appendChild(el('p', { class: 'bos', text: 'Henüz doküman eklenmedi.' }));
+    }
+    grid.appendChild(el('section', { class: 'card', id: 'dokumanlar' }, [
+      el('div', { class: 'card-head' }, [el('div', null, [el('h2', { text: 'Dokümanlar' }), el('p', { text: 'Kurulum kılavuzları ve teknik dokümanlar' })])]),
+      dokBody
+    ]));
+    if (!k.videolar.length) {
+      grid.appendChild(el('section', { class: 'card' }, [
+        el('div', { class: 'card-head' }, [el('div', null, [el('h2', { text: 'Kurulum Videoları' })])]),
+        el('div', { class: 'card-body' }, [el('p', { class: 'bos', text: 'Henüz video eklenmedi.' })])
+      ]));
+    }
+    k.videolar.forEach(function (v) {
+      grid.appendChild(el('section', { class: 'card' }, [
+        el('div', { class: 'card-head' }, [el('div', null, [el('h2', { text: v.baslik })])]),
+        el('div', { class: 'card-body' }, [
+          el('div', { class: 'video' }, [el('iframe', {
+            src: 'https://www.youtube-nocookie.com/embed/' + v.id + '?rel=0', title: v.baslik, loading: 'lazy',
+            allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
+            allowfullscreen: '', referrerpolicy: 'strict-origin-when-cross-origin'
+          })]),
+          el('div', { class: 'araclar' }, [el('a', { class: 'btn ghost', href: v.url, target: '_blank', rel: 'noopener', text: "YouTube'da aç" })])
+        ])
+      ]));
+    });
+  }
+
   function goster(urunId) {
+    if (urunId === 'kurulum' && manifest.kurulum) {
+      Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function (b) {
+        b.setAttribute('aria-selected', b.dataset.id === 'kurulum' ? 'true' : 'false');
+      });
+      var ua0 = document.getElementById('urunAciklama');
+      if (!ua0) { ua0 = el('span', { class: 'urun-aciklama', id: 'urunAciklama' }); document.getElementById('tabs').appendChild(ua0); }
+      ua0.textContent = 'Indoor ve outdoor için ortak kurulum videoları ve dokümanlar.';
+      kurulumGoster();
+      try { localStorage.setItem('urun', 'kurulum'); } catch (e) {}
+      return;
+    }
     var urun = manifest.urunler.filter(function (u) { return u.id === urunId; })[0] || manifest.urunler[0];
     if (!urun) return;
     Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function (b) {
@@ -321,6 +385,11 @@ footer { color: var(--muted); font-size: 12px; border-top: 1px solid var(--line)
       b.addEventListener('click', function () { location.hash = u.id; });
       tabs.appendChild(b);
     });
+    if (m.kurulum) {
+      var kb = el('button', { type: 'button', role: 'tab', 'data-id': 'kurulum', class: 'kurulum-tab', text: 'Kurulum (Video & Doküman)' });
+      kb.addEventListener('click', function () { location.hash = 'kurulum'; });
+      tabs.appendChild(kb);
+    }
     window.addEventListener('hashchange', secimden);
     secimden();
   }
