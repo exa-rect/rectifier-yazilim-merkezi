@@ -1,0 +1,37 @@
+{
+  "baslik": "Rectifier Yazılım Merkezi",
+  "aciklama": "Indoor ve outdoor rectifier ürünleri için güncel app, web arayüzü ve ayar dosyaları. Fabrika üretimi ve saha güncellemeleri buradan yapılır.",
+  "kategoriler": {
+    "app": {
+      "sira": 1,
+      "ad": "App (Kontrolör Yazılımı)",
+      "aciklama": "SC503 kontrolörün ana yazılımı.",
+      "kurulum": [
+        "Bilgisayarı cihazın ethernet portuna bağlayın ve web arayüzüne giriş yapın.",
+        "Yazılım güncelleme sayfasında Dosya Seç'e basın ve indirdiğiniz dosyayı seçin.",
+        "Yükle'ye basın. Yükleme ve yeniden başlatma bitene kadar cihazın enerjisini kesmeyin.",
+        "Hakkında sayfasında Yazılım Sürümü'nün yeni sürümü gösterdiğini kontrol edin."
+      ]
+    },
+    "web-arayuzu": {
+      "sira": 2,
+      "ad": "Web Arayüzü",
+      "aciklama": "Cihazın tarayıcıdan açılan arayüz paketi.",
+      "kurulum": [
+        "Web arayüzüne giriş yapın ve arayüz güncelleme sayfasında Dosya Seç'e basın.",
+        "İndirdiğiniz paketi seçip Yükle'ye basın.",
+        "Tarayıcıda sayfayı Ctrl+F5 ile yenileyin; Hakkında sayfasında Web Sürümü'nü kontrol edin."
+      ]
+    },
+    "config": {
+      "sira": 3,
+      "ad": "Ayar Dosyası (Config)",
+      "aciklama": "Ürün tipine göre hazırlanmış varsayılan sistem ayarları.",
+      "kurulum": [
+        "Ürün tipini kontrol edin: indoor kabine indoor, outdoor kabine outdoor ayar dosyası yüklenir.",
+        "Web arayüzünde ayar içe aktarma sayfasında Dosya Seç'e basın ve dosyayı seçin.",
+        "Yükledikten sonra Hızlı Ayar ve Batarya sayfalarındaki değerleri kontrol edin."
+      ]
+    }
+  }
+}
