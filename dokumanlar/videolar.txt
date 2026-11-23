@@ -5,3 +5,12 @@
 #   Yazılım yükleme adımları | https://www.youtube.com/watch?v=XXXXXXXXXXX
 # Videoyu YouTube'a "Liste dışı" (Unlisted) olarak yükleyin. # ile başlayan satırlar dikkate alınmaz.
 01 windows IP ayari | https://youtu.be/pwYijwZmbdA
+02 cihaza IP verme ve Bağlanma | https://youtu.be/BycFCbRR8Ic
+03 sistem ayarlari | https://youtu.be/ZLL-cafpRd8
+04 batarya parametre ayarları | https://youtu.be/qJFXRqJK2xg
+05 modül sayisi ayarlama | https://youtu.be/4ZFXlaLYECI
+06 lvd ayarlari degistirme | https://youtu.be/VnvJoAj_D_0
+07 shunt ayari kontrolü | https://youtu.be/Y5vyCeZPnis
+08 ayarları(config dosyası) indirme | https://youtu.be/WezTahD9z08
+09 ayar( config)  yükleme | https://youtu.be/KLqTrH6M_8A
+10 di/do( alarm ) ayar | https://youtu.be/pTh2BnPbpYM
