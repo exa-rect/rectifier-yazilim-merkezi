@@ -74,6 +74,7 @@ nav.tabs button[aria-selected="true"] { background: var(--accent); border-color:
 
 .latest { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 12px 14px; border-radius: 8px; background: var(--accent-soft); }
 .ver { font: 500 24px/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.ver.uzun { font-size: 15px; word-break: break-all; }
 .date { color: var(--muted); font-size: 13px; }
 .pill { font: 600 11.5px/1 var(--font-body); letter-spacing: .04em; text-transform: uppercase; padding: 5px 8px; border-radius: 999px; white-space: nowrap; }
 .pill.kararli { background: var(--ok-soft); color: var(--ok); }
@@ -161,6 +162,7 @@ footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line)
     var p = (s || '').split('-');
     return p.length === 3 ? p[2] + '.' + p[1] + '.' + p[0] : (s || '');
   }
+  function etiket(s) { return /^\d/.test(s) ? 'v' + s : s; }
   function mutlak(yol) { return new URL(yol, location.href).href; }
 
   function kopyalaBtn(metin, etiket) {
@@ -196,12 +198,12 @@ footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line)
 
     if (son) {
       body.appendChild(el('div', { class: 'latest' }, [
-        el('span', { class: 'ver', text: 'v' + son.surum }),
+        el('span', { class: 'ver' + (son.surum.length > 12 ? ' uzun' : ''), text: etiket(son.surum) }),
         el('span', { class: 'pill kararli', text: 'Son kararlı' }),
         el('span', { class: 'date', text: tarih(son.tarih) + (son.donanim ? ' · Donanım: ' + son.donanim : '') })
       ]));
       if (yeniTest) {
-      body.appendChild(el('div', { class: 'banner test', text: 'Daha yeni test sürümü var: v' + yeniTest.surum + '. Sadece test cihazlarında kullanın; geçmiş listesinden indirebilirsiniz.' }));
+      body.appendChild(el('div', { class: 'banner test', text: 'Daha yeni test sürümü var: ' + etiket(yeniTest.surum) + '. Sadece test cihazlarında kullanın; geçmiş listesinden indirebilirsiniz.' }));
       }
       if (son.notlar.length) body.appendChild(el('ul', { class: 'notes' }, son.notlar.map(function (n) { return el('li', { text: n }); })));
       son.dosyalar.forEach(function (d) { body.appendChild(dosyaSatiri(d)); });
@@ -225,7 +227,7 @@ footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line)
 
     var rows = k.surumler.map(function (s) {
       return el('tr', { class: s.durum }, [
-        el('td', { class: 'v', text: 'v' + s.surum }),
+        el('td', { class: 'v', text: etiket(s.surum) }),
         el('td', { text: tarih(s.tarih) }),
         el('td', null, [el('span', { class: 'pill ' + s.durum, text: DURUM[s.durum] || s.durum })]),
         el('td', null, [el('ul', null, s.notlar.map(function (n) { return el('li', { text: n }); }))]),
