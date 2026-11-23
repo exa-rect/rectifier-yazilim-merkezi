@@ -1,0 +1,6 @@
+# Kurulum videoları – indoor ve outdoor için ortak
+# Her satıra bir video:   Başlık | YouTube linki
+# Örnek:
+#   Kabin montajı ve kablo bağlantıları | https://youtu.be/XXXXXXXXXXX
+#   Yazılım yükleme adımları | https://www.youtube.com/watch?v=XXXXXXXXXXX
+# Videoyu YouTube'a "Liste dışı" (Unlisted) olarak yükleyin. # ile başlayan satırlar dikkate alınmaz.
