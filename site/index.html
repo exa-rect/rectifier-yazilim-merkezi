@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Rectifier Yazılım Merkezi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Plan: endüstriyel panel etiketi hissi. Ürün sekmesi en üstte, her kategori bir kart:
+   önce "son kararlı sürüm + indir", altında kurulum adımları, en altta sürüm geçmişi. */
+:root {
+  --bg: #eef1f3;
+  --panel: #ffffff;
+  --ink: #16202a;
+  --muted: #5b6874;
+  --line: #d5dce2;
+  --accent: #0b6b73;
+  --accent-ink: #ffffff;
+  --accent-soft: #dff0f1;
+  --ok: #1f7a3d;  --ok-soft: #e2f3e7;
+  --warn: #8a5a00; --warn-soft: #fbefd5;
+  --bad: #a3271f;  --bad-soft: #fbe3e1;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11171c; --panel: #182129; --ink: #e6ecf0; --muted: #96a4af; --line: #2a3640;
+    --accent: #4fb8bf; --accent-ink: #062226; --accent-soft: #163236;
+    --ok: #6fd08f; --ok-soft: #173323; --warn: #f0bf5a; --warn-soft: #3a2c10; --bad: #f08a80; --bad-soft: #3d1a17;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11171c; --panel: #182129; --ink: #e6ecf0; --muted: #96a4af; --line: #2a3640;
+  --accent: #4fb8bf; --accent-ink: #062226; --accent-soft: #163236;
+  --ok: #6fd08f; --ok-soft: #173323; --warn: #f0bf5a; --warn-soft: #3a2c10; --bad: #f08a80; --bad-soft: #3d1a17;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+
+header.top { background: var(--panel); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-end; justify-content: space-between; padding-top: 22px; padding-bottom: 18px; }
+h1 { font: 700 26px/1.15 var(--font-display); letter-spacing: .01em; margin: 0; text-wrap: balance; }
+.lead { color: var(--muted); margin: 6px 0 0; max-width: 64ch; }
+.stamp { font: 12px/1.4 var(--font-mono); color: var(--muted); text-align: right; }
+.stamp b { color: var(--ink); font-weight: 500; }
+
+nav.tabs { display: flex; gap: 8px; flex-wrap: wrap; padding: 18px 0 6px; }
+nav.tabs button {
+  font: 600 15px var(--font-display); letter-spacing: .02em; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  padding: 9px 18px; border-radius: 8px;
+}
+nav.tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.urun-aciklama { color: var(--muted); margin: 6px 0 18px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 500px), 1fr)); gap: 16px; padding-bottom: 32px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; }
+.card-head { display: flex; gap: 12px; align-items: baseline; justify-content: space-between; padding: 16px 18px 0; }
+.card-head h2 { font: 600 18px/1.25 var(--font-display); margin: 0; }
+.card-head p { margin: 2px 0 0; color: var(--muted); font-size: 13.5px; }
+.card-body { padding: 14px 18px 18px; display: flex; flex-direction: column; gap: 14px; }
+
+.latest { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 12px 14px; border-radius: 8px; background: var(--accent-soft); }
+.ver { font: 500 24px/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.date { color: var(--muted); font-size: 13px; }
+.pill { font: 600 11.5px/1 var(--font-body); letter-spacing: .04em; text-transform: uppercase; padding: 5px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.kararli { background: var(--ok-soft); color: var(--ok); }
+.pill.test { background: var(--warn-soft); color: var(--warn); }
+.pill.geri-cekildi { background: var(--bad-soft); color: var(--bad); }
+
+ul.notes { margin: 0; padding-left: 18px; }
+ul.notes li + li { margin-top: 2px; }
+
+.file { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.fname { font: 500 14px var(--font-mono); word-break: break-all; }
+.fmeta { font: 12px/1.5 var(--font-mono); color: var(--muted); grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.fmeta code { font: inherit; word-break: break-all; }
+.btn { display: inline-flex; align-items: center; gap: 6px; font: 600 14px var(--font-body); text-decoration: none; cursor: pointer; border-radius: 7px; padding: 8px 14px; border: 1px solid transparent; white-space: nowrap; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.ghost { background: transparent; color: var(--accent); border-color: var(--line); padding: 4px 9px; font-size: 12.5px; }
+.btn.ghost.done { color: var(--ok); border-color: var(--ok); }
+
+.banner { border-radius: 8px; padding: 10px 12px; font-size: 13.5px; }
+.banner.test { background: var(--warn-soft); color: var(--warn); }
+.banner.none { background: var(--bad-soft); color: var(--bad); }
+
+.steps h3, details summary { font: 600 13px var(--font-display); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.steps ol { margin: 0; padding-left: 20px; }
+.steps li + li { margin-top: 3px; }
+.sabit { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13px; color: var(--muted); }
+.sabit code { font: 12.5px var(--font-mono); color: var(--ink); background: var(--bg); padding: 3px 6px; border-radius: 5px; word-break: break-all; }
+
+details { border-top: 1px solid var(--line); padding-top: 12px; }
+details summary { cursor: pointer; margin: 0; }
+.tbl { overflow-x: auto; margin-top: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 12px var(--font-display); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+td.v { font: 500 13.5px var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.geri-cekildi td.v { text-decoration: line-through; color: var(--muted); }
+td ul { margin: 0; padding-left: 16px; }
+
+.state { padding: 40px 0; color: var(--muted); }
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding: 16px 0 28px; }
+@media (max-width: 420px) { .wrap { padding: 0 16px; } h1 { font-size: 22px; } .stamp { text-align: left; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div>
+      <h1 id="baslik">Rectifier Yazılım Merkezi</h1>
+      <p class="lead" id="aciklama">Güncel yazılım ve ayar dosyaları yükleniyor…</p>
+    </div>
+    <div class="stamp" id="stamp"></div>
+  </div>
+</header>
+<main class="wrap">
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Ürün"></nav>
+  <p class="urun-aciklama" id="urunAciklama"></p>
+  <div class="grid" id="grid"><p class="state">Liste yükleniyor…</p></div>
+</main>
+<footer>
+  <div class="wrap">Bu sayfa her açılışta en güncel listeyi gösterir. Yeni bir dosya GitHub deposuna eklendiğinde birkaç dakika içinde burada görünür. İndirdiğiniz dosyanın SHA-256 değeri buradakiyle aynı değilse dosyayı kullanmayın.</div>
+</footer>
+<script>
+(function () {
+  var DURUM = { kararli: 'Kararlı', test: 'Test', 'geri-cekildi': 'Geri çekildi' };
+  var manifest = null;
+
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    if (attrs) for (var k in attrs) {
+      if (k === 'text') n.textContent = attrs[k];
+      else if (k === 'class') n.className = attrs[k];
+      else if (k.indexOf('on') === 0) n.addEventListener(k.slice(2), attrs[k]);
+      else n.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { if (c) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return n;
+  }
+  function boyut(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b / 1024).toFixed(1).replace('.', ',') + ' KB';
+    return (b / 1048576).toFixed(2).replace('.', ',') + ' MB';
+  }
+  function tarih(s) {
+    var p = (s || '').split('-');
+    return p.length === 3 ? p[2] + '.' + p[1] + '.' + p[0] : (s || '');
+  }
+  function mutlak(yol) { return new URL(yol, location.href).href; }
+
+  function kopyalaBtn(metin, etiket) {
+    var b = el('button', { type: 'button', class: 'btn ghost', text: etiket });
+    b.addEventListener('click', function () {
+      function ok() { b.textContent = 'Kopyalandı'; b.classList.add('done'); setTimeout(function () { b.textContent = etiket; b.classList.remove('done'); }, 1600); }
+      try {
+        navigator.clipboard.writeText(metin).then(ok, function () { b.textContent = 'Kopyalanamadı'; });
+      } catch (e) { b.textContent = 'Kopyalanamadı'; }
+    });
+    return b;
+  }
+
+  function dosyaSatiri(d) {
+    return el('div', { class: 'file' }, [
+      el('div', { class: 'fname', text: d.ad }),
+      el('a', { class: 'btn primary', href: d.yol, download: d.ad, text: 'İndir' }),
+      el('div', { class: 'fmeta' }, [
+        el('span', { text: boyut(d.boyut) }),
+        el('span', { text: 'SHA-256' }),
+        el('code', { text: d.sha256.slice(0, 16) + '…', title: d.sha256 }),
+        kopyalaBtn(d.sha256, 'Özeti kopyala')
+      ])
+    ]);
+  }
+
+  function kart(k) {
+    var son = k.surumler.filter(function (s) { return s.surum === k.son; })[0];
+    var yeniTest = k.surumler.filter(function (s) {
+      return s.durum === 'test' && (!son || k.surumler.indexOf(s) < k.surumler.indexOf(son));
+    })[0];
+    var body = el('div', { class: 'card-body' });
+
+    if (son) {
+      body.appendChild(el('div', { class: 'latest' }, [
+        el('span', { class: 'ver', text: 'v' + son.surum }),
+        el('span', { class: 'pill kararli', text: 'Son kararlı' }),
+        el('span', { class: 'date', text: tarih(son.tarih) + (son.donanim ? ' · Donanım: ' + son.donanim : '') })
+      ]));
+      if (yeniTest) {
+      body.appendChild(el('div', { class: 'banner test', text: 'Daha yeni test sürümü var: v' + yeniTest.surum + '. Sadece test cihazlarında kullanın; geçmiş listesinden indirebilirsiniz.' }));
+      }
+      if (son.notlar.length) body.appendChild(el('ul', { class: 'notes' }, son.notlar.map(function (n) { return el('li', { text: n }); })));
+      son.dosyalar.forEach(function (d) { body.appendChild(dosyaSatiri(d)); });
+      if (k.sabitLink) {
+        var url = mutlak(k.sabitLink);
+        body.appendChild(el('div', { class: 'sabit' }, [
+          el('span', { text: 'Her zaman son sürümü indiren sabit link:' }),
+          el('code', { text: url }),
+          kopyalaBtn(url, 'Linki kopyala')
+        ]));
+      }
+    } else {
+      body.appendChild(el('div', { class: 'banner none', text: 'Bu kategoride henüz kararlı sürüm yayınlanmadı.' }));
+    }
+    if (k.kurulum && k.kurulum.length) {
+      body.appendChild(el('div', { class: 'steps' }, [
+        el('h3', { text: 'Nasıl yüklenir' }),
+        el('ol', null, k.kurulum.map(function (s) { return el('li', { text: s }); }))
+      ]));
+    }
+
+    var rows = k.surumler.map(function (s) {
+      return el('tr', { class: s.durum }, [
+        el('td', { class: 'v', text: 'v' + s.surum }),
+        el('td', { text: tarih(s.tarih) }),
+        el('td', null, [el('span', { class: 'pill ' + s.durum, text: DURUM[s.durum] || s.durum })]),
+        el('td', null, [el('ul', null, s.notlar.map(function (n) { return el('li', { text: n }); }))]),
+        el('td', null, s.dosyalar.map(function (d) {
+          var a = el('a', { href: d.yol, download: d.ad, text: d.ad });
+          if (s.durum === 'geri-cekildi') a.title = 'Geri çekilmiş sürüm: kullanmayın';
+          return el('div', null, [a]);
+        }))
+      ]);
+    });
+    if (k.surumler.length) body.appendChild(el('details', null, [
+      el('summary', { text: 'Tüm sürümler (' + k.surumler.length + ')' }),
+      el('div', { class: 'tbl' }, [el('table', null, [
+        el('thead', null, [el('tr', null, ['Sürüm', 'Tarih', 'Durum', 'Notlar', 'Dosya'].map(function (h) { return el('th', { text: h }); }))]),
+        el('tbody', null, rows)
+      ])])
+    ]));
+
+    return el('section', { class: 'card', id: k.id }, [
+      el('div', { class: 'card-head' }, [el('div', null, [el('h2', { text: k.ad }), el('p', { text: k.aciklama })])]),
+      body
+    ]);
+  }
+
+  function goster(urunId) {
+    var urun = manifest.urunler.filter(function (u) { return u.id === urunId; })[0] || manifest.urunler[0];
+    if (!urun) return;
+    Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function (b) {
+      b.setAttribute('aria-selected', b.dataset.id === urun.id ? 'true' : 'false');
+    });
+    document.getElementById('urunAciklama').textContent = urun.aciklama;
+    var grid = document.getElementById('grid');
+    grid.textContent = '';
+    if (!urun.kategoriler.length) grid.appendChild(el('p', { class: 'state', text: 'Bu ürün için henüz dosya yok.' }));
+    urun.kategoriler.forEach(function (k) { grid.appendChild(kart(k)); });
+    try { localStorage.setItem('urun', urun.id); } catch (e) {}
+  }
+
+  function secimden() {
+    var h = location.hash.replace('#', '');
+    var kayit = null; try { kayit = localStorage.getItem('urun'); } catch (e) {}
+    goster(h || kayit || (manifest.urunler[0] && manifest.urunler[0].id));
+  }
+
+  function baslat(m) {
+    manifest = m;
+    document.title = m.baslik;
+    document.getElementById('baslik').textContent = m.baslik;
+    document.getElementById('aciklama').textContent = m.aciklama;
+    var d = new Date(m.olusturma);
+    var stamp = document.getElementById('stamp');
+    stamp.textContent = '';
+    stamp.appendChild(el('div', null, ['Son güncelleme ', el('b', { text: d.toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' }) })]));
+    if (m.commit) stamp.appendChild(el('div', { text: 'Kayıt ' + m.commit.slice(0, 7) }));
+    var tabs = document.getElementById('tabs');
+    m.urunler.forEach(function (u) {
+      var b = el('button', { type: 'button', role: 'tab', 'data-id': u.id, text: u.ad });
+      b.addEventListener('click', function () { location.hash = u.id; });
+      tabs.appendChild(b);
+    });
+    window.addEventListener('hashchange', secimden);
+    secimden();
+  }
+
+  fetch('manifest.json', { cache: 'no-store' })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(baslat)
+    .catch(function () {
+      var g = document.getElementById('grid');
+      g.textContent = '';
+      g.appendChild(el('p', { class: 'state', text: 'Dosya listesi yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.' }));
+    });
+})();
+</script>
+</body>
+</html>
