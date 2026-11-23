@@ -37,6 +37,13 @@ Bir sürüme not veya "test" etiketi eklemek isterseniz dosyayı doğrudan klas�
 
 `durum`: `kararli` (son sürüm olabilir), `test` (sadece geçmişte, sarı uyarıyla), `geri-cekildi` (üstü çizili).
 
+## Kurulum videoları ve dokümanları
+
+Indoor ve outdoor için ortaktır, `dokumanlar/` klasöründe durur. Sitede "Kurulum (Video & Doküman)" sekmesinde görünür.
+
+- **PDF / doküman:** `dokumanlar/` klasörüne **Add file → Upload files** ile yükleyin (en fazla 25 MB).
+- **Video:** YouTube'a **Liste dışı (Unlisted)** yükleyin, sonra `dokumanlar/videolar.txt` dosyasına `Başlık | https://youtu.be/...` satırı ekleyin. Videolar GitHub'a yüklenmez; sitenin 1 GB sınırını doldurmasın diye YouTube'da durur.
+
 ## Linkler
 
 Site adresi: depo **Settings → Pages** sayfasında yazar (`https://<hesap>.github.io/rectifier-yazilim-merkezi/`).
@@ -45,6 +52,7 @@ Site adresi: depo **Settings → Pages** sayfasında yazar (`https://<hesap>.git
 | --- | --- |
 | `…/rectifier-yazilim-merkezi/` | Ana sayfa |
 | `…/rectifier-yazilim-merkezi/#indoor` veya `#outdoor` | Doğrudan ürün sekmesi |
+| `…/rectifier-yazilim-merkezi/#kurulum` | Doğrudan kurulum videoları ve dokümanlar |
 | `…/rectifier-yazilim-merkezi/son/indoor/app/` | **Sabit link:** her zaman Indoor'un son kararlı app dosyasını indirir. Fabrika talimatına veya QR koda bu yazılır. |
 
 Sabit link biçimi: `/son/<indoor|outdoor>/<app|web-arayuzu|config>/`
