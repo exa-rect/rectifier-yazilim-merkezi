@@ -8,6 +8,7 @@ import { readdir, readFile, mkdir, copyFile, writeFile, rm, stat, cp } from 'nod
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const KOK = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const URUNLER = path.join(KOK, 'urunler');
@@ -45,6 +46,22 @@ const surumKarsilastir = (a, b) => { // yeniden eskiye
   for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return y[i] - x[i];
   return 0;
 };
+// Dosyanın depoya son yüklendiği zaman (git geçmişinden); git yoksa dosya tarihi.
+async function yuklemeZamani(p) {
+  try {
+    const t = execFileSync('git', ['log', '-1', '--format=%cI', '--', p], { cwd: KOK, encoding: 'utf8' }).trim();
+    if (t) return new Date(t);
+  } catch {}
+  return (await stat(p)).mtime;
+}
+// Dosya adından sürüm: ..._V213.7.7z → 213.7 ; yoksa dosya adı (uzantısız)
+function addanSurum(dosyaAdi) {
+  const ad = dosyaAdi.replace(/\.[^.]+$/, '');
+  const m = ad.match(/[_\-. ]V(\d+(?:\.\d+)*)/i) || ad.match(/^V(\d+(?:\.\d+)*)/i);
+  if (m) return m[1].replace(/\.$/, '');
+  return ad;
+}
+const yerelTarih = (d) => new Date(d.getTime() + 3 * 3600e3).toISOString().slice(0, 10); // Türkiye saati
 const sha256 = async (p) => createHash('sha256').update(await readFile(p)).digest('hex');
 const yonlendirme = (hedef) => `<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=${hedef}"><title>Yönlendiriliyor…</title></head><body><p>Dosya indiriliyor. Başlamazsa <a href="${hedef}">buraya tıklayın</a>.</p></body></html>\n`;
 
@@ -111,7 +128,32 @@ async function main() {
         surumler.push({ surum: s, tarih: sj.tarih, durum: sj.durum, notlar, donanim: sj.donanim || null, dosyalar });
       }
 
-      surumler.sort((a, b) => surumKarsilastir(a.surum, b.surum));
+      // Kolay yol: dosya doğrudan bölüm klasörüne yüklendiyse her dosya bir sürümdür.
+      let gevsek = [];
+      try {
+        gevsek = (await readdir(katDir, { withFileTypes: true }))
+          .filter((f) => f.isFile() && !f.name.startsWith('.') && !/^readme\.md$/i.test(f.name))
+          .map((f) => f.name);
+      } catch {}
+      for (const ad of gevsek) {
+        const kaynak = path.join(katDir, ad);
+        const yer = `urunler/${urunId}/${katId}/${ad}`;
+        const { size } = await stat(kaynak);
+        if (size > MAX_BOYUT) { hatalar.push(`${yer}: ${(size / 1048576).toFixed(1)} MiB, sınır 25 MiB.`); continue; }
+        const zaman = await yuklemeZamani(kaynak);
+        const hedefDir = path.join(CIKTI, 'dosyalar', urunId, katId);
+        await mkdir(hedefDir, { recursive: true });
+        await copyFile(kaynak, path.join(hedefDir, ad));
+        surumler.push({
+          surum: addanSurum(ad), tarih: yerelTarih(zaman), zaman: zaman.toISOString(), durum: 'kararli', notlar: [], donanim: null,
+          dosyalar: [{ ad, boyut: size, sha256: await sha256(kaynak), yol: `dosyalar/${urunId}/${katId}/${encodeURIComponent(ad)}` }],
+        });
+      }
+
+      // Sıralama: en yeni yükleme/tarih önce; aynı günse sürüm numarası büyük olan önce.
+      for (const x of surumler) if (!x.zaman) x.zaman = `${x.tarih}T23:59:59Z`;
+      surumler.sort((a, b) => (b.zaman > a.zaman ? 1 : b.zaman < a.zaman ? -1 : 0) ||
+        (surumGecerli(a.surum) && surumGecerli(b.surum) ? surumKarsilastir(a.surum, b.surum) : 0));
       const son = surumler.find((x) => x.durum === 'kararli') || null;
       if (!son && surumler.length) uyarilar.push(`urunler/${urunId}/${katId}: kararlı sürüm yok, sitede "henüz yayınlanmadı" görünecek.`);
 
